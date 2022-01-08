@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:test_application/model_notification.dart';
 import 'firebase_operations.dart';
 import 'news_model.dart';
+import 'package:overlay_support/overlay_support.dart';
+
+import 'notification_badge.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +17,131 @@ void main() async {
 
 
 class MyApp extends StatelessWidget {
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlaySupport(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: MyHome(),
+      ),
+    );
+  }
+}
+
+class MyHome extends StatefulWidget {
+ 
+  @override
+  _MyHomeState createState() => _MyHomeState();
+}
+
+class _MyHomeState extends State<MyHome> {
+
+
+ late final FirebaseMessaging _messaging;
+ late int _totalNotificationCounter;
+
+  PushNotication? _notificationInfo;
+
+  void registerNotification() async{
+     _messaging = FirebaseMessaging.instance;
+     await Firebase.initializeApp();
+
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      provisional:false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized){
+        print("User granted permission");
+
+        FirebaseMessaging.onMessage.listen((RemoteMessage message){
+
+          PushNotication notification = PushNotication(
+           message.notification!.title as String,
+           message.notification!.body as String,
+         );
+         setState(() {
+           _totalNotificationCounter++;
+           _notificationInfo = notification;
+         });
+
+         if(notification != null){
+           showSimpleNotification(
+             Text(_notificationInfo!.title),
+             leading: 
+             NotificationBadge(),
+             subtitle: Text(_notificationInfo!.body),
+             background: Colors.cyan.shade700,
+             duration: Duration(seconds: 2),
+           );
+         }
+        },
+       );
+      }
+      else{
+        print("permission denied");
+  }
+  }
+
+checForInitialMessage() async{
+   await Firebase.initializeApp();
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    if(initialMessage != null){
+     
+          PushNotication notification = PushNotication(
+           initialMessage.notification!.title as String,
+           initialMessage.notification!.body as String,
+         );
+
+          setState(() {
+           _totalNotificationCounter++;
+           _notificationInfo = notification;
+         });
+    }
+
+  }
+
+@override
+  void initState() {
+
+//   when app is is background
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message){
+       PushNotication notification = PushNotication(
+           message.notification!.title as String,
+           message.notification!.body as String,
+         );
+         setState(() {
+           _totalNotificationCounter++;
+           _notificationInfo = notification;
+         });
+    });
+
+
+// normal notification in foreground state i.e app is running
+
+   registerNotification();
+
+// when app is in terminated state
+
+checForInitialMessage();
+
+   _totalNotificationCounter = 0;
+
+    super.initState();
+  }
+
+  
+
   final model = NewsListModel(
       bannerImageUrl: "https://unsplash.com/photos/BU7fbduIEwk",
       bannerHeadline: "Headline",
@@ -19,6 +149,8 @@ class MyApp extends StatelessWidget {
       listItemHeadLine: "Newsheadling",
       listItemImageUrl: "imageUrl",
       listItemNewsLink: "List Item News Link");
+
+      
 
   List<String> testList = [];
 
@@ -42,16 +174,9 @@ class MyApp extends StatelessWidget {
   void clearList(){
      testList.clear();
   }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text("TestApplication"),
         ),
@@ -74,7 +199,6 @@ class MyApp extends StatelessWidget {
 
           ],
         ),
-      ),
-    );
+      );
   }
 }
