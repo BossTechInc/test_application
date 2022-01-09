@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:test_application/home_page.dart';
 import 'package:test_application/model_notification.dart';
+import 'package:test_application/no_connectin.dart';
+import 'package:test_application/provider_file_service.dart';
 import 'firebase_operations.dart';
 import 'news_model.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -17,20 +22,31 @@ void main() async {
 
 
 class MyApp extends StatelessWidget {
-  
+ 
+
+
+
 
   @override
   Widget build(BuildContext context) {
-    return OverlaySupport(
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(
+        create: (context) => ConnectivityProvider(),
+        child: HomePage(),
+      ),
+    ],
+      child: OverlaySupport(
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MyHome(),
+        home: HomePage() ,
       ),
+    ),
     );
+
   }
 }
 
@@ -136,6 +152,8 @@ checForInitialMessage() async{
 checForInitialMessage();
 
    _totalNotificationCounter = 0;
+
+
 
     super.initState();
   }
