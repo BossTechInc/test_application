@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:test_application/home_page.dart';
 import 'package:test_application/model_notification.dart';
-import 'package:test_application/no_connectin.dart';
 import 'package:test_application/provider_file_service.dart';
 import 'firebase_operations.dart';
 import 'news_model.dart';
 import 'package:overlay_support/overlay_support.dart';
-
 import 'notification_badge.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,12 +19,7 @@ void main() async {
   runApp(MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
- 
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +55,8 @@ class _MyHomeState extends State<MyHome> {
 
  late final FirebaseMessaging _messaging;
  late int _totalNotificationCounter;
-
-  PushNotication? _notificationInfo;
+ PushNotication? _notificationInfo;
+ var now = DateTime.now();
 
   void registerNotification() async{
      _messaging = FirebaseMessaging.instance;
@@ -153,27 +147,27 @@ checForInitialMessage();
 
    _totalNotificationCounter = 0;
 
-
-
     super.initState();
   }
 
-  
+ String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   final model = NewsListModel(
       bannerImageUrl: "https://unsplash.com/photos/BU7fbduIEwk",
       bannerHeadline: "Headline",
       bannerNewsLink: "BannernewsURL",
-      listItemHeadLine: "Newsheadling",
+      listItemHeadLine: "New News",
       listItemImageUrl: "imageUrl",
-      listItemNewsLink: "List Item News Link");
+      listItemNewsLink: "List Item News Link",
+      date :  DateFormat('yyyy-MM-dd').format(DateTime.now()));
 
-      
 
   List<String> testList = [];
+  List<NewsListModel> testNewsModel = [NewsListModel(),NewsListModel(),NewsListModel(),NewsListModel(),NewsListModel()];
+  //Get Data
 
    Future<void> retrieveApp() async {
-    await FirebaseFirestore.instance.collection('news').get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('news').limit(10).where('date',isEqualTo: currentDate).get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         testList.add(doc["listItemHeadLine"]);
       });
@@ -207,9 +201,14 @@ checForInitialMessage();
               },
             ),
             ElevatedButton(onPressed: (){retrieveApp();}, child: Text("Recieve")),
+
+           Text(currentDate),
+
            Expanded(
              child: ListView.builder(itemCount: testList.length,itemBuilder: (context,index){
+
                 return Text("Item ${testList[index]}");
+
               }),
            ),
             ElevatedButton(onPressed: (){printOnConsole();}, child: Text("Print")),

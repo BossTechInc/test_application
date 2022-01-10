@@ -6,9 +6,10 @@ class NewsListModel {
   String? listItemHeadLine;
   String? listItemNewsLink;
   String? id;
+  String? date;
 
   NewsListModel({this.bannerImageUrl, this.bannerHeadline, this.bannerNewsLink,
-      this.listItemImageUrl, this.listItemHeadLine, this.listItemNewsLink,this.id});
+      this.listItemImageUrl, this.listItemHeadLine, this.listItemNewsLink,this.id, this.date});
 
 
   Map<String,dynamic> toJson() => {
@@ -20,6 +21,7 @@ class NewsListModel {
     'listItemHeadLine' : listItemHeadLine,
     'listItemNewsLink' : listItemNewsLink,
     'id' : id,
+    'date' : date,
   };
 
 }
