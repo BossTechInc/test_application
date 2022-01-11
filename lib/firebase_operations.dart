@@ -5,7 +5,7 @@ import 'news_model.dart';
 class FirebaseOps {
 
   static Future<String> createItem(NewsListModel newsListModel) async {
-    final docToCreate = FirebaseFirestore.instance.collection('news').doc();
+    final docToCreate = FirebaseFirestore.instance.collection('/news/politics/news_data').doc();
     newsListModel.id = docToCreate.id;
     await docToCreate.set(newsListModel.toJson());
 

@@ -1,22 +1,17 @@
 class NewsListModel {
-  String? bannerImageUrl;
-  String? bannerHeadline;
-  String? bannerNewsLink;
   String? listItemImageUrl;
   String? listItemHeadLine;
   String? listItemNewsLink;
   String? id;
   String? date;
+  bool? isBanner;
 
-  NewsListModel({this.bannerImageUrl, this.bannerHeadline, this.bannerNewsLink,
+  NewsListModel({this.isBanner,
       this.listItemImageUrl, this.listItemHeadLine, this.listItemNewsLink,this.id, this.date});
-
 
   Map<String,dynamic> toJson() => {
 
-    'bannerImageUrl' : bannerImageUrl,
-    'bannerHeadline' : bannerHeadline,
-    'bannerNewsLink' : bannerNewsLink,
+    'banner' : isBanner,
     'listItemImageUrl' : listItemImageUrl,
     'listItemHeadLine' : listItemHeadLine,
     'listItemNewsLink' : listItemNewsLink,

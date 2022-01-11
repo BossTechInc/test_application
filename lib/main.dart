@@ -52,11 +52,10 @@ class MyHome extends StatefulWidget {
 
 class _MyHomeState extends State<MyHome> {
 
-
  late final FirebaseMessaging _messaging;
  late int _totalNotificationCounter;
  PushNotication? _notificationInfo;
- var now = DateTime.now();
+ //var now = DateTime.now();
 
   void registerNotification() async{
      _messaging = FirebaseMessaging.instance;
@@ -136,7 +135,6 @@ checForInitialMessage() async{
          });
     });
 
-
 // normal notification in foreground state i.e app is running
 
    registerNotification();
@@ -153,13 +151,10 @@ checForInitialMessage();
  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   final model = NewsListModel(
-      bannerImageUrl: "https://unsplash.com/photos/BU7fbduIEwk",
-      bannerHeadline: "Headline",
-      bannerNewsLink: "BannernewsURL",
       listItemHeadLine: "New News",
       listItemImageUrl: "imageUrl",
       listItemNewsLink: "List Item News Link",
-      date :  DateFormat('yyyy-MM-dd').format(DateTime.now()));
+      date :  DateFormat('yyyy-MM-dd').format(DateTime.now()),isBanner: true);
 
 
   List<String> testList = [];
@@ -167,7 +162,7 @@ checForInitialMessage();
   //Get Data
 
    Future<void> retrieveApp() async {
-    await FirebaseFirestore.instance.collection('news').limit(10).where('date',isEqualTo: currentDate).get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('news/politics/news_data').limit(10).where('banner',isEqualTo: true,).get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         testList.add(doc["listItemHeadLine"]);
       });
@@ -207,7 +202,7 @@ checForInitialMessage();
            Expanded(
              child: ListView.builder(itemCount: testList.length,itemBuilder: (context,index){
 
-                return Text("Item ${testList[index]}");
+                return Text("${testList[index]}");
 
               }),
            ),
