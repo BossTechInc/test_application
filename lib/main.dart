@@ -12,7 +12,6 @@ import 'news_model.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'notification_badge.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
