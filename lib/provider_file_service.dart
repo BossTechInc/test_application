@@ -2,11 +2,29 @@
 
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ConnectivityProvider with ChangeNotifier{
+
+  ConnectivityProvider(){
+    retrieveApp();
+  }
+
+
+  List<String> testList = [];
+
+
+  Future<void> retrieveApp() async {
+
+    await FirebaseFirestore.instance.collection('news/politics/news_data').limit(10).where('banner',isEqualTo: true,).get().then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        testList.add(doc["listItemHeadLine"]);
+      });
+    });
+  }
 
 Connectivity _connectivity = new Connectivity();
 

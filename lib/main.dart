@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(providers: [
       ChangeNotifierProvider(
         create: (context) => ConnectivityProvider(),
@@ -50,6 +51,8 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
+
+
 
  late final FirebaseMessaging _messaging;
  late int _totalNotificationCounter;
@@ -156,32 +159,37 @@ checForInitialMessage();
       date :  DateFormat('yyyy-MM-dd').format(DateTime.now()),isBanner: true);
 
 
-  List<String> testList = [];
+ // List<String> provider.testList = [];
+
   List<NewsListModel> testNewsModel = [NewsListModel(),NewsListModel(),NewsListModel(),NewsListModel(),NewsListModel()];
   //Get Data
 
-   Future<void> retrieveApp() async {
-    await FirebaseFirestore.instance.collection('news/politics/news_data').limit(10).where('banner',isEqualTo: true,).get().then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        testList.add(doc["listItemHeadLine"]);
-      });
-    });
-  }
+  //  Future<void> retrieveApp() async {
+  //   await FirebaseFirestore.instance.collection('news/politics/news_data').limit(10).where('banner',isEqualTo: true,).get().then((QuerySnapshot querySnapshot) {
+  //     querySnapshot.docs.forEach((doc) {
+  //       provider.testList.add(doc["listItemHeadLine"]);
+  //     });
+  //   });
+  // }
 
-  void printOnConsole(){
-     if(testList.isNotEmpty) {
-       for (int i = 0; i < testList.length; i++) {
-         print(testList[i]);
-       }
-     }else{
-       print("List is Empty");
-     }
-  }
-  void clearList(){
-     testList.clear();
-  }
   @override
   Widget build(BuildContext context) {
+    ConnectivityProvider provider = Provider.of<ConnectivityProvider>(context);
+
+    void printOnConsole(){
+      if(provider.testList.isNotEmpty) {
+        for (int i = 0; i < provider.testList.length; i++) {
+          print(provider.testList[i]);
+        }
+      }else{
+        print("List is Empty");
+      }
+    }
+
+    void clearList(){
+      provider.testList.clear();
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: Text("TestApplication"),
@@ -194,14 +202,14 @@ checForInitialMessage();
                 FirebaseOps.createItem(model);
               },
             ),
-            ElevatedButton(onPressed: (){retrieveApp();}, child: Text("Recieve")),
+            ElevatedButton(onPressed: (){}, child: Text("Recieve")),
 
            Text(currentDate),
 
            Expanded(
-             child: ListView.builder(itemCount: testList.length,itemBuilder: (context,index){
+             child: ListView.builder(itemCount: provider.testList.length,itemBuilder: (context,index){
 
-                return Text("${testList[index]}");
+                return Text("${provider.testList[index]}");
 
               }),
            ),
