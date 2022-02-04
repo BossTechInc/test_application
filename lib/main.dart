@@ -6,16 +6,28 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:test_application/home_page.dart';
 import 'package:test_application/model_notification.dart';
+import 'package:test_application/my_theme.dart';
+import 'package:test_application/notifications_test/green.dart';
+import 'package:test_application/notifications_test/red.dart';
+import 'package:test_application/notifications_test/services/local_notification_service.dart';
 import 'package:test_application/provider_file_service.dart';
+import 'package:test_application/theme_change_switch.dart';
 import 'firebase_operations.dart';
+import 'my_theme.dart';
+import 'my_theme.dart';
 import 'news_model.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'notification_badge.dart';
 
-
+Future<void> backgroundHandler(RemoteMessage message) async{
+  print(message.data.toString());
+  print(message.notification!.title);
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   runApp(MyApp());
 }
 
@@ -28,17 +40,31 @@ class MyApp extends StatelessWidget {
         create: (context) => ConnectivityProvider(),
         child: HomePage(),
       ),
-    ],
-      child: OverlaySupport(
+      ChangeNotifierProvider(
+        create: (context) => ThemeProvider(),
+         child: HomePage(),
+        builder:(context, _){
+          final themeProvider = Provider.of<ThemeProvider>(context);
+           return OverlaySupport(
       child: MaterialApp(
         title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+        themeMode: themeProvider.themeMode,
+        theme: MyThemes.lightTheme,
+        darkTheme: MyThemes.darkTheme,
         home: HomePage() ,
+        routes: {
+          "red":(_)=> const Red(),
+          "green":(_)=> const Green(),
+        },
       ),
-    ),
+    );
+          
+        }
+       
+      ),
+    ],
+    
+   
     );
 
   }
@@ -53,99 +79,50 @@ class MyHome extends StatefulWidget {
 class _MyHomeState extends State<MyHome> {
 
 
- late final FirebaseMessaging _messaging;
- late int _totalNotificationCounter;
- PushNotication? _notificationInfo;
- var now = DateTime.now();
+ 
 
-  void registerNotification() async{
-     _messaging = FirebaseMessaging.instance;
-     await Firebase.initializeApp();
 
-    NotificationSettings settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      provisional:false,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized){
-        print("User granted permission");
-
-        FirebaseMessaging.onMessage.listen((RemoteMessage message){
-
-          PushNotication notification = PushNotication(
-           message.notification!.title as String,
-           message.notification!.body as String,
-         );
-         setState(() {
-           _totalNotificationCounter++;
-           _notificationInfo = notification;
-         });
-
-         if(notification != null){
-           showSimpleNotification(
-             Text(_notificationInfo!.title),
-             leading: 
-             NotificationBadge(),
-             subtitle: Text(_notificationInfo!.body),
-             background: Colors.cyan.shade700,
-             duration: Duration(seconds: 2),
-           );
-         }
-        },
-       );
-      }
-      else{
-        print("permission denied");
-  }
-  }
-
-checForInitialMessage() async{
-   await Firebase.initializeApp();
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-
-    if(initialMessage != null){
-     
-          PushNotication notification = PushNotication(
-           initialMessage.notification!.title as String,
-           initialMessage.notification!.body as String,
-         );
-
-          setState(() {
-           _totalNotificationCounter++;
-           _notificationInfo = notification;
-         });
-    }
-
-  }
 
 @override
   void initState() {
+    LocalNotificationService.initialize(context);
 
-//   when app is is background
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message){
-       PushNotication notification = PushNotication(
-           message.notification!.title as String,
-           message.notification!.body as String,
-         );
-         setState(() {
-           _totalNotificationCounter++;
-           _notificationInfo = notification;
-         });
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if(message != null){
+        final routeFromMessage = message.data['route'];
+      }
     });
 
+// foreground 
 
-// normal notification in foreground state i.e app is running
 
-   registerNotification();
+  FirebaseMessaging.onMessage.listen((message){
+    print(message.notification!.body);
+    print(message.notification!.title);
 
-// when app is in terminated state
 
-checForInitialMessage();
+    LocalNotificationService.display(message);
 
-   _totalNotificationCounter = 0;
+
+  });
+
+  
+//   when app is is background 
+
+  FirebaseMessaging.onMessageOpenedApp.listen((message){
+     
+   final routeFromMessage = message.data["route"];
+   print(routeFromMessage);
+
+   Navigator.of(context).pushNamed(routeFromMessage);
+
+  });
+
+  
+
+
+
+
 
     super.initState();
   }
@@ -191,6 +168,10 @@ checForInitialMessage();
     return Scaffold(
         appBar: AppBar(
           title: Text("TestApplication"),
+          actions: [
+            ChangeThemeButtonWidget(),
+          ],
+         
         ),
         body: Column(
           children: [
