@@ -19,10 +19,13 @@ import 'news_model.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'notification_badge.dart';
 
+<<<<<<< HEAD
 Future<void> backgroundHandler(RemoteMessage message) async{
   print(message.data.toString());
   print(message.notification!.title);
 }
+=======
+>>>>>>> 60ca2e470d4ee58b95b975c4bcb6f7d6d443e318
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -78,8 +81,15 @@ class MyHome extends StatefulWidget {
 
 class _MyHomeState extends State<MyHome> {
 
+<<<<<<< HEAD
 
  
+=======
+ late final FirebaseMessaging _messaging;
+ late int _totalNotificationCounter;
+ PushNotication? _notificationInfo;
+ //var now = DateTime.now();
+>>>>>>> 60ca2e470d4ee58b95b975c4bcb6f7d6d443e318
 
 
 
@@ -104,6 +114,7 @@ class _MyHomeState extends State<MyHome> {
     LocalNotificationService.display(message);
 
 
+<<<<<<< HEAD
   });
 
   
@@ -119,6 +130,9 @@ class _MyHomeState extends State<MyHome> {
   });
 
   
+=======
+// normal notification in foreground state i.e app is running
+>>>>>>> 60ca2e470d4ee58b95b975c4bcb6f7d6d443e318
 
 
 
@@ -130,13 +144,10 @@ class _MyHomeState extends State<MyHome> {
  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   final model = NewsListModel(
-      bannerImageUrl: "https://unsplash.com/photos/BU7fbduIEwk",
-      bannerHeadline: "Headline",
-      bannerNewsLink: "BannernewsURL",
       listItemHeadLine: "New News",
       listItemImageUrl: "imageUrl",
       listItemNewsLink: "List Item News Link",
-      date :  DateFormat('yyyy-MM-dd').format(DateTime.now()));
+      date :  DateFormat('yyyy-MM-dd').format(DateTime.now()),isBanner: true);
 
 
   List<String> testList = [];
@@ -144,7 +155,7 @@ class _MyHomeState extends State<MyHome> {
   //Get Data
 
    Future<void> retrieveApp() async {
-    await FirebaseFirestore.instance.collection('news').limit(10).where('date',isEqualTo: currentDate).get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('news/politics/news_data').limit(10).where('banner',isEqualTo: true,).get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         testList.add(doc["listItemHeadLine"]);
       });
@@ -188,7 +199,7 @@ class _MyHomeState extends State<MyHome> {
            Expanded(
              child: ListView.builder(itemCount: testList.length,itemBuilder: (context,index){
 
-                return Text("Item ${testList[index]}");
+                return Text("${testList[index]}");
 
               }),
            ),
